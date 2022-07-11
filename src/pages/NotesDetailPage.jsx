@@ -5,9 +5,9 @@ import { ReactComponent as ArrowLeft } from '../assets/arrow-left.svg';
 
 const NotesDetailPage = (props) => {
     let noteID = useParams().id;
-    
+    let history = useNavigate()
     let [note, setNote] = useState(null)
-
+    console.log(history);
     let getNote = async() => {
       if (noteID === 'new') return 
       let response = await fetch(`http://127.0.0.1:8000/notes/${noteID}`);
@@ -39,6 +39,7 @@ const NotesDetailPage = (props) => {
         },
         body:JSON.stringify({...note, 'updated':new Date()})
       })
+      history('/');
     }
 
     let deleteNote = async() => {
@@ -49,7 +50,7 @@ const NotesDetailPage = (props) => {
           },
           body:JSON.stringify({...note, 'updated':new Date()})
         })
-      props.history.push("/");
+      history('/');
     }
 
   let handleSubmit = () =>{
@@ -64,8 +65,8 @@ const NotesDetailPage = (props) => {
     else if (noteID === 'new' && !note.body){
       createNote()
     }
-    
-    props.history.push("/");
+
+    history('/');
   }
 
 
