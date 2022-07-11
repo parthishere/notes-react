@@ -5,18 +5,21 @@ import { ReactComponent as ArrowLeft } from '../assets/arrow-left.svg';
 
 const NotesDetailPage = (props) => {
     let noteID = useParams().id;
+    
     let [note, setNote] = useState(null)
 
-
-    useEffect(() => {
-      getNote()
-    }, [noteID])
- 
-    let getNote = async () => {
+    let getNote = async() => {
+      if (noteID === 'new') return 
       let response = await fetch(`http://127.0.0.1:8000/notes/${noteID}`);
       let data = await response.json();
       setNote(data);
     }
+
+    useEffect(() => {
+      
+      getNote()
+    }, [noteID])
+ 
 
     let updateNote = async() => {
       await fetch(`http://127.0.0.1:8000/notes/${noteID}`, {
@@ -28,10 +31,45 @@ const NotesDetailPage = (props) => {
       })
     }
 
+    let createNote = async() => {
+      await fetch(`http://127.0.0.1:8000/notes/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({...note, 'updated':new Date()})
+      })
+    }
+
+    let deleteNote = async() => {
+      await fetch(`http://127.0.0.1:8000/notes/${noteID}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({...note, 'updated':new Date()})
+        })
+      props.history.push("/");
+    }
+
   let handleSubmit = () =>{
-    updateNote()
+
+    if (noteID !== 'new' && !note.body )
+    {
+      deleteNote()
+    }
+    else if (noteID !== 'new'){
+      updateNote()
+    }
+    else if (noteID === 'new' && !note.body){
+      createNote()
+    }
+    
     props.history.push("/");
   }
+
+
+  
 
   return (
     <div className='note'>
@@ -41,6 +79,14 @@ const NotesDetailPage = (props) => {
                     <ArrowLeft onClick={handleSubmit}/>
                 </Link>
             </h3>
+            {
+              noteID !== 'new' ? (
+                <button onClick={deleteNote}>Delete</button>
+              ): (
+                <button onClick={createNote}>Done</button>
+              )
+            }
+            
         </div>
         <textarea value={note?.body} onChange={(e) => {setNote({...note, "body":e.target.value})}}>
 
